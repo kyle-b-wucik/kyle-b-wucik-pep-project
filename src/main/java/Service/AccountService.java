@@ -30,5 +30,23 @@ public class AccountService {
         // if passes all verification adds to database
         return accountDAO.insertAccount(account);
     }
+
+    public Account login(Account account) {
+        //null check
+        if (account == null || account.getUsername() == null || account.getPassword() == null) {
+            return null;
+        }
+
+        //find account
+        Account existingAccount = accountDAO.getAccountByUsername(account.getUsername());
+
+        //check if account exists and password matches
+        if (existingAccount != null && existingAccount.getPassword().equals(account.getPassword())) {
+            return existingAccount;
+        }
+
+        //if not found or password doesnt match
+        return null;
+    }
     
 }

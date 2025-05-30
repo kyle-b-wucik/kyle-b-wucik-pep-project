@@ -28,6 +28,7 @@ public class SocialMediaController {
         Javalin app = Javalin.create();
 
         app.post("/register", this::registerHandler);
+        app.post("/login", this::loginHandler);
 
         return app;
     }
@@ -53,6 +54,21 @@ public class SocialMediaController {
         }
 
         context.json(createdAccount);
+
+    }
+
+    private void loginHandler(Context context) {
+        Account loginAttempt = context.bodyAsClass(Account.class);
+        Account verifiedAccount = accountService.login(loginAttempt);
+
+        if (verifiedAccount != null) {
+            context.json(verifiedAccount);
+            context.status(200); // ok - default
+        } 
+        
+        else {
+            context.status(401); //unauthorized
+        }
 
     }
 
