@@ -10,6 +10,7 @@ public class AccountService {
     }
 
     public Account register(Account account) {
+        
         // null check
         if (account == null) {
             return null;

@@ -1,8 +1,14 @@
 package Controller;
 
 import DAO.AccountDAO;
+import DAO.MessageDAO;
+
 import Model.Account;
+import Model.Message;
+
 import Service.AccountService;
+import Service.MessageService;
+
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
@@ -19,9 +25,11 @@ public class SocialMediaController {
      */
     
     private AccountService accountService;
+    private MessageService messageService;
 
     public SocialMediaController() {
         this.accountService = new AccountService(new AccountDAO());
+        this.messageService = new MessageService(new MessageDAO());
     }
 
     public Javalin startAPI() {
@@ -29,6 +37,7 @@ public class SocialMediaController {
 
         app.post("/register", this::registerHandler);
         app.post("/login", this::loginHandler);
+        app.post("/messages", this::messageHandler);
 
         return app;
     }
@@ -72,4 +81,16 @@ public class SocialMediaController {
 
     }
 
+    private void messageHandler(Context context) {
+        Message incomingMessage = context.bodyAsClass(Message.class);
+        Message savedMessage = messageService.makeMessage(incomingMessage);
+
+        if (savedMessage == null) {
+            context.status(400);
+        }
+        else {
+            context.json(incomingMessage);
+            context.status(200);
+        }
+    }
 }
