@@ -1,5 +1,7 @@
 package Controller;
 
+import java.util.List;
+
 import DAO.AccountDAO;
 import DAO.MessageDAO;
 
@@ -107,23 +109,35 @@ public class SocialMediaController {
     }
 
     private void getAllMessagesHandler(Context context) {
-        return null;
+        List<Message> allMessages = messageService.getAllMessages();
+
+        context.json(allMessages);
+        context.status(200);
+
     }
 
     private void getMessageByIdHandler(Context context) {
-        return null;
+        String messageIdStr = context.pathParam("message_id");
+        int messageId = Integer.parseInt(messageIdStr);
+
+        Message foundMessage = messageService.getMessageById(messageId);
+
+        if (foundMessage != null) {
+            context.json(foundMessage);
+        }
+        context.status(200);
     }
 
     private void deleteMessageHandler(Context context) {
-        return null;
+        return;
     }
 
     private void getMessageByUserHandler(Context context) {
-        return null;
+        return;
     }
 
     private void updateMessageHandler(Context context) {
-        return null;
+        return;
     }
 
 }

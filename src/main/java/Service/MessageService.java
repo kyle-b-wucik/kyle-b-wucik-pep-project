@@ -1,4 +1,6 @@
 package Service;
+import java.util.List;
+
 import DAO.MessageDAO;
 import Model.Message;
 
@@ -28,6 +30,18 @@ public class MessageService {
         //if all checks out return to DAO
         return messageDAO.insertMessage(message);
 
+    }
+
+    public List<Message> getAllMessages() {
+
+        return messageDAO.getAllMessages();
+
+    }
+
+    public Message getMessageById(int messageId) {
+        Message existingMessage = messageDAO.getMessageById(messageId);
+
+        return existingMessage;
     }
 
 }

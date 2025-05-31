@@ -4,6 +4,8 @@ import Model.Message;
 import Util.ConnectionUtil;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MessageDAO {
     
@@ -33,5 +35,65 @@ public class MessageDAO {
 
             return null;
 
+    }
+
+    public List<Message> getAllMessages() {
+
+        try {
+            Connection connection = ConnectionUtil.getConnection();
+            String sql = "select * from message";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<Message> messages = new ArrayList<>();
+
+            while(resultSet.next()) {
+                
+                int messageId = resultSet.getInt("message_id");
+                int postedBy = resultSet.getInt("posted_by");
+                String messageText = resultSet.getString("message_text");
+                long timePosted = resultSet.getLong("time_posted_epoch");
+
+                Message message = new Message(messageId, postedBy, messageText, timePosted);
+                messages.add(message);
+
+            }
+
+            return messages;
+            
+        }
+
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return new ArrayList<>();
+    }
+
+    public Message getMessageById(int messageId) {
+        try {
+            Connection connection = ConnectionUtil.getConnection();
+
+            String sql = "select * from Message where message_id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            preparedStatement.setInt(1, messageId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                
+                int id = resultSet.getInt("message_id");
+                int postedBy = resultSet.getInt("posted_by");
+                String messageText = resultSet.getString("message_text");
+                long timePosted = resultSet.getLong("time_posted_epoch");
+
+                return new Message(id, postedBy, messageText, timePosted);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
