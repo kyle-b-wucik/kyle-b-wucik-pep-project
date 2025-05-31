@@ -44,4 +44,10 @@ public class MessageService {
         return existingMessage;
     }
 
+    public Message deleteMessage(int messageId) {
+        Message deletedMessage = messageDAO.deleteMessage(messageId);
+
+        return deletedMessage;
+    }
+
 }
