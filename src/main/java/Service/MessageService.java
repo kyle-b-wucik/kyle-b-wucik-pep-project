@@ -50,4 +50,7 @@ public class MessageService {
         return deletedMessage;
     }
 
+    public List<Message> getMessageByUser(int messageUser) {
+        return messageDAO.getMessageByUser(messageUser);
+    }
 }
