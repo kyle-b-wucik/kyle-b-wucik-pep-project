@@ -164,4 +164,36 @@ public class MessageDAO {
         
         return new ArrayList<>();
     }
+
+    public Message updateMessage (int messageId, String newMessageText) {
+
+        try{
+            Message messageToUpdate = getMessageById(messageId);
+            Connection connection = ConnectionUtil.getConnection();
+
+            if (messageToUpdate == null) {
+                return null;
+            }
+
+            String sql = "update message set message_text=? where message_id=?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            preparedStatement.setString(1, newMessageText);
+            preparedStatement.setInt(2, messageId);
+
+            int rowsUpdated = preparedStatement.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                return new Message(messageId, messageToUpdate.getPosted_by(), newMessageText, messageToUpdate.getTime_posted_epoch());
+            }
+            else {
+                return null;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

@@ -53,4 +53,19 @@ public class MessageService {
     public List<Message> getMessageByUser(int messageUser) {
         return messageDAO.getMessageByUser(messageUser);
     }
+
+    public Message updateMessage(int messageId, String newMessageText) {
+
+        if (newMessageText == null || newMessageText.isBlank()) {
+            return null;
+        }
+
+        if (newMessageText.length() >= 255) {
+            return null;
+        }
+
+        Message updatedMessage = messageDAO.updateMessage(messageId, newMessageText);
+
+        return updatedMessage;
+    }
 }

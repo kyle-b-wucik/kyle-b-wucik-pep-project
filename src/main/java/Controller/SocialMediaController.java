@@ -152,7 +152,27 @@ public class SocialMediaController {
     }
 
     private void updateMessageHandler(Context context) {
-        return;
+        String messageIdStr = context.pathParam("message_id");
+        String newMessageText;
+        int messageId;
+
+        try {
+            messageId = Integer.parseInt(messageIdStr);
+            Message messageFromBody = context.bodyAsClass(Message.class);
+            newMessageText = messageFromBody.getMessage_text();
+        } catch (NumberFormatException e) {
+            context.status(400);
+            return;
+        }
+
+        Message updatedMessage = messageService.updateMessage(messageId, newMessageText);
+        if(updatedMessage != null) {
+            context.json(updatedMessage);
+            context.status(200);
+        }
+        else {
+            context.status(400);
+        }
     }
 
 }
