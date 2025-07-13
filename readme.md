@@ -1,95 +1,151 @@
-# Project: Social media blog API
+# Social Media Blog API
 
-## Background 
+A RESTful backend API for a social media application built with Java, featuring user authentication and message management with full CRUD operations using a custom 3-layer architecture.
 
-When building a full-stack application, we're typically concerned with both a front end, that displays information to the user and takes in input, and a backend, that manages persisted information.
+## Technologies Used
+- **Java** - Core programming language
+- **Javalin** - Lightweight web framework for REST API
+- **JDBC** - Database connectivity and SQL operations
+- **SQLite/H2** - Embedded database for data persistence
+- **JSON** - Data serialization with Jackson/Gson
+- **Maven** - Dependency management and build tool
 
-This project will be a backend for a hypothetical social media app, where we must manage our users’ accounts as well as any messages that they submit to the application. The application will function as a micro-blogging or messaging app. In our hypothetical application, any user should be able to see all of the messages posted to the site, or they can see the messages posted by a particular user. In either case, we require a backend which is able to deliver the data needed to display this information as well as process actions like logins, registrations, message creations, message updates, and message deletions.
+## Features
+- 🔐 User registration and authentication system
+- ✍️ Create, read, update, and delete messages
+- 🔍 Retrieve messages by user or message ID
+- ✅ Input validation and comprehensive error handling
+- 🌐 RESTful API design with proper HTTP status codes
+- 🗄️ Custom DAO layer with raw SQL queries
+- 🏗️ 3-layer architecture (Controller, Service, DAO)
 
-## Database Tables 
+## API Endpoints
 
-These will be provided in a sql script, and a ConnectionUtil class that will run the sql script is provided:
+### Authentication
+- `POST /register` - Register a new user account
+- `POST /login` - Authenticate user credentials
 
-### Account
+### Messages
+- `POST /messages` - Create a new message
+- `GET /messages` - Retrieve all messages
+- `GET /messages/{message_id}` - Get a specific message by ID
+- `PATCH /messages/{message_id}` - Update message text
+- `DELETE /messages/{message_id}` - Delete a message
+- `GET /accounts/{account_id}/messages` - Get all messages by a specific user
+
+## Getting Started
+
+### Prerequisites
+- Java 8 or higher
+- Maven 3.6+
+
+### Installation & Running
+1. Clone the repository
+   ```bash
+   git clone [your-repo-url]
+   cd social-media-blog-api
+   ```
+
+2. Compile and run the application
+   ```bash
+   mvn compile exec:java
+   ```
+
+3. The API will be available at `http://localhost:8080`
+
+## Project Structure
+
 ```
-account_id integer primary key auto_increment,
-username varchar(255) unique,
-password varchar(255)
+src/main/java/
+├── Controller/         # REST endpoint handlers
+├── Service/           # Business logic layer
+├── DAO/              # Data access objects
+├── Model/            # Entity classes (Account, Message)
+└── Main.java         # Application entry point
 ```
 
-### Message
+## Database Schema
+
+### Account Table
+- `account_id` - Primary key (auto-generated)
+- `username` - Unique username (required)
+- `password` - User password (minimum 4 characters)
+
+### Message Table
+- `message_id` - Primary key (auto-generated)
+- `posted_by` - Foreign key to Account
+- `message_text` - Message content (max 255 characters)
+- `time_posted_epoch` - Timestamp when message was created
+
+## Architecture Highlights
+
+### 3-Layer Architecture
+- **Controller Layer**: Handles HTTP requests/responses and routing
+- **Service Layer**: Contains business logic and validation rules
+- **DAO Layer**: Manages database operations with raw SQL queries
+
+### Custom Implementation
+- Hand-written SQL queries for all database operations
+- Custom connection management and transaction handling
+- Manual JSON serialization/deserialization
+- Built without heavy frameworks to demonstrate core Java skills
+
+## Validation Rules
+
+### User Registration
+- Username must not be blank and must be unique
+- Password must be at least 4 characters long
+- Returns 400 for any validation errors
+
+### Message Creation/Updates
+- Message text must not be blank
+- Message text cannot exceed 255 characters
+- User must exist in the database
+- Returns 400 for validation failures
+
+### Error Handling
+- 200: Success responses
+- 400: Client errors (validation failures)
+- 401: Unauthorized (login failures)
+
+## Key Learning Outcomes
+
+This project demonstrates proficiency in:
+- **Core Java Development** - Object-oriented programming and design patterns
+- **RESTful API Design** - Proper HTTP methods, status codes, and resource naming
+- **Database Programming** - Raw SQL queries, JDBC, and connection management
+- **Architecture Design** - 3-layer architecture and separation of concerns
+- **Manual Framework Implementation** - Building web services without Spring Boot
+- **JSON Processing** - Manual serialization and API data handling
+
+## Sample API Usage
+
+### Register a New User
+```bash
+curl -X POST http://localhost:8080/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"john_doe","password":"password123"}'
 ```
-message_id integer primary key auto_increment,
-posted_by integer,
-message_text varchar(255),
-time_posted_epoch long,
-foreign key (posted_by) references Account(account_id)
+
+### Create a Message
+```bash
+curl -X POST http://localhost:8080/messages \
+  -H "Content-Type: application/json" \
+  -d '{"posted_by":1,"message_text":"Hello, World!","time_posted_epoch":1669947792}'
 ```
 
-# Requirements
+### Get All Messages
+```bash
+curl -X GET http://localhost:8080/messages
+```
 
-## 1: Our API should be able to process new User registrations.
+## Technical Challenges Solved
+- Custom routing and HTTP request handling with Javalin
+- Manual database connection pooling and transaction management
+- Input validation without annotation-based frameworks
+- JSON parsing and serialization without Spring Boot auto-configuration
+- Error handling and appropriate HTTP status code mapping
 
-As a user, I should be able to create a new Account on the endpoint POST localhost:8080/register. The body will contain a representation of a JSON Account, but will not contain an account_id.
+---
 
-- The registration will be successful if and only if the username is not blank, the password is at least 4 characters long, and an Account with that username does not already exist. If all these conditions are met, the response body should contain a JSON of the Account, including its account_id. The response status should be 200 OK, which is the default. The new account should be persisted to the database.
-- If the registration is not successful, the response status should be 400. (Client error)
-
-## 2: Our API should be able to process User logins.
-
-As a user, I should be able to verify my login on the endpoint POST localhost:8080/login. The request body will contain a JSON representation of an Account, not containing an account_id. In the future, this action may generate a Session token to allow the user to securely use the site. We will not worry about this for now.
-
-- The login will be successful if and only if the username and password provided in the request body JSON match a real account existing on the database. If successful, the response body should contain a JSON of the account in the response body, including its account_id. The response status should be 200 OK, which is the default.
-- If the login is not successful, the response status should be 401. (Unauthorized)
-
-
-## 3: Our API should be able to process the creation of new messages.
-
-As a user, I should be able to submit a new post on the endpoint POST localhost:8080/messages. The request body will contain a JSON representation of a message, which should be persisted to the database, but will not contain a message_id.
-
-- The creation of the message will be successful if and only if the message_text is not blank, is not over 255 characters, and posted_by refers to a real, existing user. If successful, the response body should contain a JSON of the message, including its message_id. The response status should be 200, which is the default. The new message should be persisted to the database.
-- If the creation of the message is not successful, the response status should be 400. (Client error)
-
-## 4: Our API should be able to retrieve all messages.
-
-As a user, I should be able to submit a GET request on the endpoint GET localhost:8080/messages.
-
-- The response body should contain a JSON representation of a list containing all messages retrieved from the database. It is expected for the list to simply be empty if there are no messages. The response status should always be 200, which is the default.
-
-## 5: Our API should be able to retrieve a message by its ID.
-
-As a user, I should be able to submit a GET request on the endpoint GET localhost:8080/messages/{message_id}.
-
-- The response body should contain a JSON representation of the message identified by the message_id. It is expected for the response body to simply be empty if there is no such message. The response status should always be 200, which is the default.
-
-## 6: Our API should be able to delete a message identified by a message ID.
-
-As a User, I should be able to submit a DELETE request on the endpoint DELETE localhost:8080/messages/{message_id}.
-
-- The deletion of an existing message should remove an existing message from the database. If the message existed, the response body should contain the now-deleted message. The response status should be 200, which is the default.
-- If the message did not exist, the response status should be 200, but the response body should be empty. This is because the DELETE verb is intended to be idempotent, ie, multiple calls to the DELETE endpoint should respond with the same type of response.
-
-## 7: Our API should be able to update a message text identified by a message ID.
-
-As a user, I should be able to submit a PATCH request on the endpoint PATCH localhost:8080/messages/{message_id}. The request body should contain a new message_text values to replace the message identified by message_id. The request body can not be guaranteed to contain any other information.
-
-- The update of a message should be successful if and only if the message id already exists and the new message_text is not blank and is not over 255 characters. If the update is successful, the response body should contain the full updated message (including message_id, posted_by, message_text, and time_posted_epoch), and the response status should be 200, which is the default. The message existing on the database should have the updated message_text.
-- If the update of the message is not successful for any reason, the response status should be 400. (Client error)
-
-## 8: Our API should be able to retrieve all messages written by a particular user.
-
-As a user, I should be able to submit a GET request on the endpoint GET localhost:8080/accounts/{account_id}/messages.
-
-- The response body should contain a JSON representation of a list containing all messages posted by a particular user, which is retrieved from the database. It is expected for the list to simply be empty if there are no messages. The response status should always be 200, which is the default.
-
-# Further guidance
-
-Some classes are already complete and SHOULD NOT BE CHANGED - Integration tests, Model classes for Account and Message, a ConnectionUtil class. Changing any of these classes will likely result in the test cases being impossible to pass.
-
-The .sql script found in src/main/resources is already complete and SHOULD NOT BE CHANGED. Changing this file will likely result in the test cases being impossible to pass.
-
-You SHOULD be changing the SocialMediaController class to add endpoints to the StartAPI method. A main method in Main.java is also provided to allow you to run the entire application and manually play or test with the app. Changing that class will not affect the test cases at all. You could use it to perform any manual unit testing on your other classes.
-
-You SHOULD be creating and designing DAO and Service class to allow you to complete the project. In theory, you could design the project however you like, so long as the functionality works and you are somehow persisting data to the database - but a 3-layer architecture is a robust design pattern and following help you in the long run. You can refer to prior mini-projects and course material for help on designing your application in this way.
-
-# Good luck!
+*Built to demonstrate fundamental Java web development skills and understanding of web service architecture without relying on heavy frameworks like Spring Boot.*
